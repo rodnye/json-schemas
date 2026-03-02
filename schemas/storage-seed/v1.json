@@ -15,5 +15,8 @@
       "uniqueItems": true
     }
   },
-  "required": ["include"]
+  "required": [
+    "include"
+  ],
+  "$id": "https://rodnye.github.io/json-schemas/schemas/storage-seed/v1.json"
 }

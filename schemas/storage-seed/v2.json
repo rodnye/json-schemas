@@ -43,5 +43,8 @@
       ]
     }
   },
-  "required": ["include"]
+  "required": [
+    "include"
+  ],
+  "$id": "https://rodnye.github.io/json-schemas/schemas/storage-seed/v2.json"
 }
