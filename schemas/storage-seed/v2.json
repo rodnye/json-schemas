@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Seed Configuration Schema",
+  "description": "Schema to validate seed configuration in projects that require copying specific directory structures.",
+  "type": "object",
+  "properties": {
+    "include": {
+      "type": "array",
+      "description": "List of directories to copy recursively",
+      "items": {
+        "type": "string",
+        "description": "Path relative or glob patterns to seed root"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "examples": [
+        [
+          "public/content/**/*.md",
+          "images/*.{jpg,webp}",
+          "./rss.xml",
+          "assets/**/*"
+        ]
+      ]
+    },
+    "exclude": {
+      "type": "array",
+      "description": "List of glob patterns to exclude from the copy operation",
+      "items": {
+        "type": "string",
+        "description": "Glob pattern for files/directories to exclude"
+      },
+      "uniqueItems": true,
+      "examples": [
+        [
+          "**/*.log",
+          "node_modules",
+          "dist",
+          ".git",
+          "*.tmp",
+          "**/*.test.js",
+          "coverage/**"
+        ]
+      ]
+    }
+  },
+  "required": ["include"]
+}
