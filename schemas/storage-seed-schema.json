@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Seed Configuration Schema",
-  "description": "Schema to validate seed configuration in projects that require copying specific directory structures",
+  "description": "Schema to validate seed configuration in projects that require copying specific directory structures.",
   "type": "object",
   "properties": {
     "include": {
