@@ -7,15 +7,43 @@ const REPO_OWNER = process.env.GITHUB_REPOSITORY_OWNER;
 const REPO_NAME = process.env.GITHUB_REPOSITORY.split('/')[1];
 
 /**
- * Updatea el $id de un archivo schema JSON con la URL pública
+ * Recursively finds all .json files in a directory
  */
-const updateSchemaId =  async (filePath, newId) => {
+const findJsonFilesRecursively = async (dir) => {
+  let results = [];
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      const subDirFiles = await findJsonFilesRecursively(fullPath);
+      results = results.concat(subDirFiles);
+    } else if (entry.isFile() && entry.name.endsWith('.json')) {
+      results.push(fullPath);
+    }
+  }
+
+  return results;
+};
+
+/**
+ * Gets the relative path from the base directory
+ */
+const getRelativePath = (fullPath, baseDir) => {
+  return fullPath.replace(baseDir + '/', '');
+};
+
+/**
+ * Updates the $id of a JSON schema file with the public URL
+ */
+const updateSchemaId = async (filePath, newId) => {
   const content = await fs.readFile(filePath, 'utf8');
   let schema;
   try {
     schema = JSON.parse(content);
   } catch (err) {
-    console.error(`Error parseando ${filePath}:`, err.message);
+    console.error(`Error parsing ${filePath}:`, err.message);
     return false;
   }
 
@@ -26,9 +54,9 @@ const updateSchemaId =  async (filePath, newId) => {
   schema.$id = newId;
 
   await fs.writeFile(filePath, JSON.stringify(schema, null, 2) + '\n', 'utf8');
-  console.log(`Actualizado $id en ${filePath}`);
+  console.log(`Updated $id in ${filePath}`);
   return true;
-}
+};
 
 const main = async () => {
   const readmePath = join(process.cwd(), 'README.md');
@@ -43,22 +71,30 @@ const main = async () => {
   }
 
   const schemasDir = join(process.cwd(), 'schemas');
-  let schemaFiles = await fs.readdir(schemasDir);
-  schemaFiles = schemaFiles.filter((file) => file.endsWith('.json'));
+
+  const schemaFiles = await findJsonFilesRecursively(schemasDir);
+
+  console.log(`Found ${schemaFiles.length} schema files:`);
+  schemaFiles.forEach((file) =>
+    console.log(`  - ${getRelativePath(file, schemasDir)}`),
+  );
 
   const baseUrl = `https://${REPO_OWNER}.github.io/${REPO_NAME}/schemas/`;
 
-  // los $id de cada schema
+  // Update $id for each schema
   let anySchemaUpdated = false;
-  for (const file of schemaFiles) {
-    const filePath = join(schemasDir, file);
-    const newId = baseUrl + file;
+  for (const filePath of schemaFiles) {
+    const relativePath = getRelativePath(filePath, schemasDir);
+    const newId = baseUrl + relativePath;
     const updated = await updateSchemaId(filePath, newId);
     if (updated) anySchemaUpdated = true;
   }
 
+  // Generate list of URLs for README (sorted alphabetically)
   const schemaUrls = schemaFiles
-    .map((file) => `- ${baseUrl}${file}`)
+    .map((filePath) => getRelativePath(filePath, schemasDir))
+    .sort()
+    .map((relativePath) => `- ${baseUrl}${relativePath}`)
     .join('\n');
 
   const newSection = `${START_MARKER}\n${schemaUrls}\n${END_MARKER}`;
@@ -74,13 +110,12 @@ const main = async () => {
   } else {
     console.log('No changes needed in README.md');
   }
- 
-  // evitar commits vacios
+
   if (!anySchemaUpdated && !readmeUpdated) {
     console.log('No updates performed.');
     process.exit(0);
   }
-}
+};
 
 main().catch((err) => {
   console.error(err);
