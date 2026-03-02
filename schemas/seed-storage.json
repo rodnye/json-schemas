@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://rodnye.github.io/json-schemas/schemas/seed-schema.json",
+  "title": "Seed Configuration Schema",
+  "description": "Schema to validate seed configuration in projects that require copying specific directory structures",
+  "type": "object",
+  "properties": {
+    "include": {
+      "type": "array",
+      "description": "List of directories to copy recursively",
+      "items": {
+        "type": "string",
+        "description": "Directory name or path relative to seed root"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "required": ["include"]
+}
