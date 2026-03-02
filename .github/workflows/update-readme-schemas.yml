@@ -10,6 +10,8 @@ on:
 jobs:
   update-readme:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,7 +22,7 @@ jobs:
           node-version: '20'
 
       - name: Update README with schemas
-        run: node .github/scripts/update-readme.js
+        run: node .github/scripts/update-readme-schemas.js
 
       - name: Commit changes
         run: |
