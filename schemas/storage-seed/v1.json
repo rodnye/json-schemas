@@ -15,7 +15,5 @@
       "uniqueItems": true
     }
   },
-  "required": [
-    "include"
-  ]
+  "required": ["include"]
 }
